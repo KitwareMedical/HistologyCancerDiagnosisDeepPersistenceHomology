@@ -1,7 +1,7 @@
 # Histology Cancer Diagnosis Deep Persistence Homology
 
-# Running The Project 
-Start the training using:
+# Training
+To train a model run:
 ```shell
 python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file> --results=<Path-to-results-directory>
 ```
@@ -37,12 +37,15 @@ Arguments for main.py:
 Specify the exp name in config as "Combined", "Persistence" or "RGB" to train on that particular data.
 
 
+# Evaluation 
+
+
 Arguments for test.py:  
 ```shell
 --test_dir <Path to test data directory>       :  The test directory must contain the folders : malignant/ and benign/ as shown in the data structure below
 --config_dir <Path to config folder>           :  The config_dir directory must contain the model.config file and the directory checkpoint/ which has hdf5 files 
 ```
-
+The script will save the ROC curve and pickle dump the evaluation metrics in the config directory.
 
 ## Project Structure
 
@@ -143,3 +146,13 @@ The nuclei stain is computed by first normalizing the image to LAB standard usin
 The percentage of RGB pixels are calculated in an image which have all pixel values greater than or equal to 200. If this percentage is greater than 70% (i.e. the image has mainly white background), the image is rejected.  
 
 Only those images are taken for training which survive all the 4 tests mentioned above.
+
+
+# Results
+
+|                  |  __AUC__   |__Accuracy__|  __F1__  | __Precision__ |  __Recall__ |
+|------------------|------------|------------|----------|---------------|-------------|
+|      RGB         |   0.9369   |    0.8103  |  0.8370  |     0.7427    |    0.9587   | 
+|   Persistence    |   0.7816   |    0.7205  |  0.7421  |     0.6984    |    0.7917   |
+| RGB+Persistence  | **0.9463** |  **0.8193**|**0.8435**|   **0.7530**  |  **0.9587** |
+

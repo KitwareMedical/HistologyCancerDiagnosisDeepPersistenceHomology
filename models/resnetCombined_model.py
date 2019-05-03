@@ -43,6 +43,7 @@ class ResNetCombinedModel(BaseModel):
         xPer = Conv2D(128, (4, 4), strides=2, activation='relu')(xPer)
         xPer = BatchNormalization()(xPer)
         xPer = GlobalAveragePooling2D(name='AvgPoolPer')(xPer)
+        
         top_model = Model(inputs=inputPer, outputs=xPer)
         top_model.name = 'persistenceTop'
         xPer = top_model(inputPer)
