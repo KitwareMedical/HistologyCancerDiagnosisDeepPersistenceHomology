@@ -6,12 +6,16 @@ Start the training using:
 python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file>
 ```
 
-By default the models use Tensorboard and [Cyclic Learning Rate](https://github.com/bckenstler/CLR) in the callback.  
-To run [One-Cycle-Learning-Rate](https://github.com/titu1994/keras-one-cycle) policy run the command as follows:  
+The models uses Tensorboard by default in the callback.  
+The models currenty use one of the following two optimizers: 
+* SGD if optimizer is set to "sgd" in config file. Uses [One-Cyclic-Learning-Rate](https://github.com/titu1994/keras-one-cycle#training-with-onecyclelr) policy to update the learning rate.
+* Adam if optimizer is set to "adam" in config file. Uses [Reduce-LR-On-Plateau](https://keras.io/callbacks/#reducelronplateau) to control the learning rate.
+
+To find the optimum learning rate using [One-Cycle-Learning-Rate](https://github.com/titu1994/keras-one-cycle) policy run the command as follows:  
 ```shell
 python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file> --findLR=True
 ```
-This will run the iterations for only one epoch and save the Learning Rate vs Loss curve in 'Results/LRFinder/' directory.
+This will run the iterations for only one epoch and save the Learning Rate vs Loss curve in '<results>/LRFinder/' directory.
 
 Arguments for main.py:  
 ```shell

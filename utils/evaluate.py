@@ -103,7 +103,7 @@ def test_persistence(config):
     print 'Building model'
     model = PersistenceModel(config).model
     #model = ResNetPersistenceModel(config).model
-    
+
     print 'Predicting'
     Y_prob, score, acc = PersistenceTest(model, [X_test, Y_test], config)
 
@@ -117,6 +117,7 @@ def test_rgb(config):
     X_test, Y_test = RGBTestData(config)
     print X_test.shape
     print len(Y_test)
+
     print 'Building model'
     model = ResNetRGBModel(config).model
 
