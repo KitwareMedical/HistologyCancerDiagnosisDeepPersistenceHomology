@@ -163,7 +163,7 @@ class ResNetCombinedTrainer(BaseTrainer):
 def ResNetCombinedTest(model, data, config):
     # https://github.com/keras-team/keras/issues/6499#issuecomment-301562885
     X_RGB, X_Per, Y_test = data
-    #print 'Inside Test'
+
     print 'RGB : ', X_RGB.shape
     print 'Per : ', X_Per.shape
     print 'Y : ', len(Y_test)

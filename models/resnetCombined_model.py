@@ -1,9 +1,8 @@
 
 from base.base_model import BaseModel
 from base.base_trainer import focal_loss
-import tensorflow as tf
 import keras
-from keras.layers import Input, Dense, Conv2D, Conv2DTranspose, Activation, Dropout, GlobalAveragePooling2D, Concatenate, concatenate, BatchNormalization
+from keras.layers import Input, Dense, Conv2D, Activation, Dropout, GlobalAveragePooling2D, concatenate, BatchNormalization
 from keras.models import Model
 from keras import optimizers
 from keras.utils import multi_gpu_model

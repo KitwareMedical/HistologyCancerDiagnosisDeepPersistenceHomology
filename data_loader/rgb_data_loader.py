@@ -1,20 +1,17 @@
 import numpy as np
 import skimage.io
-import os, sys, time
-import re
 import matplotlib.pyplot as plt
 import cPickle as pickle
-import h5py
-import glob
 from keras.utils import to_categorical, Sequence
 from keras.applications.resnet50 import preprocess_input as preprocess_resnet
 from keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
-from sklearn.utils import class_weight
 import histomicstk.preprocessing.color_normalization as htk_cnorm
-import os
+from sklearn.utils import class_weight
+import os, re, glob
 import random
 from shutil import copyfile
+
 
 class BaseGenerator(Sequence):
     def __init__(self, config):
@@ -58,13 +55,6 @@ class BaseGenerator(Sequence):
         random.shuffle(z)
         self.train_paths, self.train_outputs = zip(*z)
 
-
-
-
-        #self.train_paths = self.train_paths[0 : self.config.len_train]
-        #self.train_outputs = self.train_outputs[0 : self.config.len_train]
-        #self.cv_paths = self.cv_paths[0 : self.config.len_CV]
-        #self.cv_outputs = self.cv_outputs[0 : self.config.len_CV]
 
         self.ref_std_lab=(0.57506023, 0.10403329, 0.01364062)
         self.ref_mu_lab=(8.63234435, -0.11501964, 0.03868433)
@@ -126,13 +116,6 @@ class RGBTrainGenerator(BaseGenerator):
         print 'Train Length : ', len(self.train_paths)
         self.datagen = ImageDataGenerator(horizontal_flip=True, vertical_flip=True)
 
-        #percent = 0.1
-        #self.mal_paths_train = self.mal_paths_train[0 : int(percent * len(self.mal_paths_train))]
-        #self.ben_paths_train = self.ben_paths_train[0 : int(percent * len(self.ben_paths_train))]
-        #self.mal_outputs_train = self.mal_outputs_train[0 : int(percent * len(self.mal_outputs_train))]
-        #self.ben_outputs_train = self.ben_outputs_train[0 : int(percent * len(self.ben_outputs_train))]
-
-
         print('# Malignant Samples : %d' % len(self.mal_paths_train))
         print('# Benign    Samples : %d' % len(self.ben_paths_train))
 
@@ -160,8 +143,6 @@ class RGBTrainGenerator(BaseGenerator):
             X[i] = self.preprocess(batchx[i])
             Y[i] = to_categorical(batchy[i], num_classes=2)
 
-        #itr = self.datagen.flow(X, batch_size=self.batch_size)
-        #X = itr.next()
 
         return (X, Y)
 
@@ -235,7 +216,6 @@ def RGBTestData(config):
 
     for i in range(len_test):
 
-        #img = skimage.io.imread(test_paths[i])[::4, ::4, :]
         img = skimage.io.imread(test_paths[i])
         if img.shape == (1024, 1024, 3):
                 img = img[::4, ::4, :]
@@ -252,6 +232,6 @@ def RGBTestData(config):
         img = preprocess_resnet(img_nmzd)
 
         X[i] = img
-        Y[i] = test_outputs[i] #to_categorical(test_outputs[i], num_classes=2)
+        Y[i] = test_outputs[i]
 
     return (X, Y)

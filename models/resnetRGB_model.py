@@ -1,11 +1,10 @@
 from base.base_model import BaseModel
 from base.base_trainer import focal_loss
 import tensorflow as tf
-from keras.layers import Input, Dense, Conv2D, Conv2DTranspose, Activation, Dropout, GlobalAveragePooling2D
+from keras.layers import Input, Dense, Conv2D, Activation, Dropout, GlobalAveragePooling2D
 from keras.models import Model
 from keras import optimizers
 import keras
-from keras.utils import multi_gpu_model
 
 from utils.metrics import auc, f1, precision, recall
 
@@ -32,7 +31,6 @@ class ResNetRGBModel(BaseModel):
         x = Dropout(self.config.trainer.dropout)(x)
         outputY = Dense(2, activation='softmax')(x)
         self.model = Model(inputs=inputX, outputs=outputY)
-
 
 
         for block_num in range(self.config.model.freeze_RGB):

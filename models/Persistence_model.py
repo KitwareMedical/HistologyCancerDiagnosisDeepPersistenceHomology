@@ -1,16 +1,11 @@
-import tensorflow as tf
 from base.base_model import BaseModel
 from base.base_trainer import focal_loss
-import tensorflow as tf
-import keras
-from keras.layers import Input, Dense, Conv2D, Conv2DTranspose, Activation, Dropout, GlobalAveragePooling2D, Concatenate, concatenate
+from keras.layers import Input, Dense, Conv2D, Activation, Dropout, GlobalAveragePooling2D
 from keras.layers import BatchNormalization
 from keras.models import Model
 from keras import optimizers
 import os
 import numpy as np
-
-import tensorflow as tf
 from keras import backend as K
 from sklearn import metrics
 
@@ -27,17 +22,12 @@ class PersistenceModel(BaseModel):
         inputX = Input(shape = input_shape)
         x = Conv2D(128, (4, 4), strides=2, activation='relu')(inputX)
         x = BatchNormalization(name='batchnorm1')(x)
-        #x = Dropout(self.config.trainer.dropout)(x)
         x = Conv2D(128, (4, 4), strides=2, activation='relu')(x)
         x = BatchNormalization(name='batchnorm2')(x)
         x = GlobalAveragePooling2D(name='AvgPoolPer')(x)
 
         top_model = Model(inputs=inputX, outputs=x)
         top_model.name = 'persistenceTop'
-
-        #top_model.get_layer('batchnorm1').trainable = False
-        #top_model.get_layer('batchnorm2').trainable = False
-
 
         x = top_model(inputX)
 

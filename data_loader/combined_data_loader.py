@@ -63,14 +63,9 @@ class BaseGenerator(Sequence):
         random.shuffle(z)
         self.cv_paths, self.cv_outputs = zip(*z)
 
-        #self.train_paths = self.train_paths[ 0 : self.config.len_train]
-        #self.train_outputs = self.train_outputs[ 0 : self.config.len_train]
-        #self.cv_paths = self.cv_paths[ 0 : self.config.len_CV]
-        #self.cv_outputs = self.cv_outputs[ 0 : self.config.len_CV]
-
         print('# Malignant Samples : %d' % len(self.mal_paths_train))
         print('# Benign    Samples : %d' % len(self.ben_paths_train))
-        
+
         self.train_files = [os.path.basename(elem) for elem in self.train_paths]
         self.cv_files = [os.path.basename(elem) for elem in self.cv_paths]
 
@@ -125,7 +120,6 @@ class CombinedTrainGenerator(BaseGenerator):
         print 'Copied config file'
 
 
-
     def __len__(self):
         return len(self.train_paths) / self.batch_size
 
@@ -145,7 +139,7 @@ class CombinedTrainGenerator(BaseGenerator):
             fnameRGB = batchx[i] + '.jpg'
             fnamePer = batchx[i] + '.pkl'
 
-            if batchy[i] == self.label['malignant'] : #image_id in self.mal_ids:
+            if batchy[i] == self.label['malignant'] :
                 pathRGB = os.path.join(self.path_mal_train, fnameRGB)
                 pathPer = os.path.join(self.path_mal_train_per, fnamePer)
 
@@ -179,9 +173,6 @@ class CombinedTrainGenerator(BaseGenerator):
             X_Per[i] = imgPer
             Y[i] = to_categorical(batchy[i], num_classes=2)
 
-        #itr = self.datagen.flow(X_RGB, batch_size=self.batch_size)
-        #X_RGB = itr.next()
-
         return ([X_RGB, X_Per], Y)
 
 
@@ -212,7 +203,7 @@ class CombinedCVGenerator(BaseGenerator):
             fnamePer = batchx[i] + '.pkl'
 
 
-            if batchy[i] == self.label['malignant'] : #image_id in self.mal_ids:
+            if batchy[i] == self.label['malignant'] :
                 pathRGB = os.path.join(self.path_mal_cv, fnameRGB)
                 pathPer = os.path.join(self.path_mal_cv_per, fnamePer)
 
@@ -220,7 +211,6 @@ class CombinedCVGenerator(BaseGenerator):
                 pathRGB = os.path.join(self.path_ben_cv, fnameRGB)
                 pathPer = os.path.join(self.path_ben_cv_per, fnamePer)
 
-            #img = skimage.io.imread(pathRGB)[::4, ::4, :]
             img = skimage.io.imread(pathRGB)
             if img.shape == (1024, 1024, 3):
                 img = img[::4, ::4, :]
@@ -288,7 +278,7 @@ def CombinedTestData(config):
     else:
         print 'No stats file found (To obtain Mu and Sigma from original whole image).'
 
-    len_test = len(test_outputs) #config.len_test#
+    len_test = len(test_outputs)
 
     X_RGB = np.zeros((len_test, 256, 256, 3))
     X_Per = np.zeros((len_test, 32, 32, 1))
@@ -312,7 +302,6 @@ def CombinedTestData(config):
             pathPer = os.path.join(path_ben_test_per, fnamePer)
 
 
-        #img = skimage.io.imread(pathRGB)[::4, ::4, :]
         img = skimage.io.imread(pathRGB)
         if img.shape == (1024, 1024, 3):
                 img = img[::4, ::4, :]
@@ -343,102 +332,3 @@ def CombinedTestData(config):
     print 'len(Y) : ', len(Y)
 
     return [X_RGB, X_Per, Y]
-
-
-
-
-'''
-class CombinedTestGenerator(Sequence):
-    def __init__(self, config):
-        self.config = config
-        self.dataDir = config['data_path']
-
-        self.path_mal_test, _, self.files_malignant_test = next(os.walk( os.path.join(config.test_dir, 'malignant', 'rgb') ))
-        self.path_ben_test, _, self.files_benign_test = next(os.walk( os.path.join(config.test_dir, 'benign', 'rgb') ))
-
-        self.path_mal_test_per, _, _ = next(os.walk( os.path.join(config.test_dir, 'malignant', 'persistence_images') ))
-        self.path_ben_test_per, _, _ = next(os.walk( os.path.join(config.test_dir, 'benign', 'persistence_images') ))
-
-        self.batch_size = self.config.trainer.batch_size
-        self.label = self.config.label
-
-        self.mal_paths_test = glob.glob( os.path.join(self.path_mal_test, '*') )
-        self.ben_paths_test = glob.glob( os.path.join(self.path_ben_test, '*') )
-
-        self.mal_outputs_test = [self.label['malignant']] * len(self.mal_paths_test)
-        self.ben_outputs_test = [self.label['benign']] * len(self.ben_paths_test)
-
-        self.class_weights = self.config.class_weights
-
-        self.test_paths = self.mal_paths_test + self.ben_paths_test
-        self.test_outputs = self.mal_outputs_test + self.ben_outputs_test
-
-        self.test_files = [os.path.basename(elem) for elem in self.test_paths]
-        self.test_files = [elem.replace('.jpg', '') for elem in self.test_files]
-
-        self.ref_std_lab=(0.57506023, 0.10403329, 0.01364062)
-        self.ref_mu_lab=(8.63234435, -0.11501964, 0.03868433)
-
-        if os.path.isfile('configs/stats.pkl'):
-            with open('configs/stats.pkl', 'rb') as f:
-                self.stats = pickle.load(f)
-            print 'Stats loaded'
-            self.config['stats'] = self.stats
-        else:
-            print 'No stats file found (To obtain Mu and Sigma from original whole image).'
-
-
-    def __len__(self):
-        return len(self.test_paths) / self.batch_size
-
-
-    def __getitem__(self, idx):
-
-        print '__getitem__ : ', idx
-        batchx = self.test_files[ idx*self.batch_size : (idx+1)*self.batch_size ]
-        batchy = self.test_outputs[ idx*self.batch_size : (idx+1)*self.batch_size ]
-
-        X_RGB = np.zeros((self.batch_size, 256, 256, 3))
-        X_Per = np.zeros((self.batch_size, 224, 224, 3))
-        Y = np.zeros((self.batch_size, 2))
-
-        for i in range(self.batch_size):
-
-            image_id =  int(float(re.findall("\d+\.\d+", batchx[i])[0]))
-
-            fnameRGB = batchx[i] + '.jpg'
-            fnamePer = batchx[i] + '.pkl'
-
-            if batchy[i] == self.label['malignant']:
-                pathRGB = os.path.join(self.path_mal_test, fnameRGB)
-                pathPer = os.path.join(self.path_mal_test_per, fnamePer)
-
-            elif batchy[i] == self.label['benign']:
-                pathRGB = os.path.join(self.path_ben_test, fnameRGB)
-                pathPer = os.path.join(self.path_ben_test_per, fnamePer)
-
-
-            img = skimage.io.imread(pathRGB)[::4, ::4, :]
-            image_id = int(float(re.findall("\d+\.\d+", pathRGB)[0]))
-
-            if image_id in self.stats.keys():
-                [src_mu, src_sigma] = self.stats[image_id]
-                img_nmzd = htk_cnorm.reinhard(img, self.ref_mu_lab, self.ref_std_lab, src_mu=src_mu, src_sigma=src_sigma).astype('float')
-            else:
-                print '#### stats for %d not present' % (image_id)
-                img_nmzd = htk_cnorm.reinhard(img, self.ref_mu_lab, self.ref_std_lab).astype('float')
-
-            imgRGB = preprocess_resnet(img_nmzd)
-
-            with open(pathPer, 'rb') as f:
-                img = pickle.load(f)
-            img = np.array([img]*3)
-            imgPer = np.moveaxis(img, 0, 2)
-
-            X_RGB[i] = imgRGB
-            X_Per[i] = imgPer
-            Y[i] = to_categorical(self.test_outputs[idx], num_classes=2)
-
-
-        return ([X_RGB, X_Per], Y)
-'''

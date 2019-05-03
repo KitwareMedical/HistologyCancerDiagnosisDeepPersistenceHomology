@@ -20,13 +20,12 @@ def process_config(args):
 
     if config.exp.name not in ["RGB", "Persistence", "Combined"]:
         print 'Specify model exp name ("RGB", "Persistence", "Combined") in config file : %s' % (path_json_file_model)
-	sys.exit(0)
+        sys.exit(0)
 
     config['data_path']      =   args.__dict__['data']
     config['findLR']         =  (args.__dict__['findLR']=='True')
-    config['rgb']            =  (config.exp.name == 'RGB')         #(args.__dict__['rgb']=='True')
-    config['custom']         =  (args.__dict__['custom']=='True')
-    config['combined']       =  (config.exp.name == 'Combined')    #(args.__dict__['combined']=='True')
+    config['rgb']            =  (config.exp.name == 'RGB')
+    config['combined']       =  (config.exp.name == 'Combined')
     config['set_weights']    =  (args.__dict__['set_weights']=='True')
     config['use_focal_loss'] =  (args.__dict__['use_focal_loss']=='True')
 
@@ -86,7 +85,7 @@ def process_config(args):
     if config.tensorboard.embeddings_data == 'None':
         config.tensorboard.embeddings_data = None
 
-    
+
     if not os.path.isdir(config.results):
         os.makedirs(config.results)
 

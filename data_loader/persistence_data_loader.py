@@ -1,22 +1,19 @@
 import numpy as np
 import skimage.io
-import os, sys, time
-import re
+import os, re, glob, random
 import matplotlib.pyplot as plt
 import cPickle as pickle
-import h5py
-import glob
 from keras.utils import to_categorical, Sequence
 from sklearn.model_selection import train_test_split
 from sklearn.utils import class_weight
 from keras.applications.resnet50 import preprocess_input as preprocess_resnet
 import histomicstk.preprocessing.color_normalization as htk_cnorm
-import random
 from shutil import copyfile
 
 
 class PersistenceBaseGenerator(Sequence):
     def __init__(self, config):
+
         self.config = config
 
         self.path_mal_train, _, self.files_malignant_train = next(os.walk( os.path.join(self.config['data_path'], 'train', 'malignant', 'persistence_images') ))
@@ -27,37 +24,32 @@ class PersistenceBaseGenerator(Sequence):
         self.batch_size = self.config.trainer.batch_size
         self.label = self.config.label
 
-
         self.mal_paths_train = glob.glob( os.path.join(self.path_mal_train, '*') )
         self.ben_paths_train = glob.glob( os.path.join(self.path_ben_train, '*') )
         self.mal_paths_cv = glob.glob( os.path.join(self.path_mal_cv, '*') )
         self.ben_paths_cv = glob.glob( os.path.join(self.path_ben_cv, '*') )
-
 
         self.mal_outputs_train = [self.label['malignant']] * len(self.mal_paths_train)
         self.ben_outputs_train = [self.label['benign']] * len(self.ben_paths_train)
         self.mal_outputs_cv = [self.label['malignant']] * len(self.mal_paths_cv)
         self.ben_outputs_cv = [self.label['benign']] * len(self.ben_paths_cv)
 
-
         self.train_paths = self.mal_paths_train + self.ben_paths_train
         self.train_outputs = self.mal_outputs_train + self.ben_outputs_train
         self.cv_paths = self.mal_paths_cv + self.ben_paths_cv
         self.cv_outputs = self.mal_outputs_cv + self.ben_outputs_cv
 
-
         z = zip(self.train_paths, self.train_outputs)
         random.shuffle(z)
         self.train_paths, self.train_outputs = zip(*z)
-
 
         self.train_paths = self.train_paths[0 : self.config.len_train]
         self.train_outputs = self.train_outputs[0 : self.config.len_train]
         self.cv_paths = self.cv_paths[0 : self.config.len_CV]
         self.cv_outputs = self.cv_outputs[0 : self.config.len_CV]
 
-        self.up_max = 0.004191742773320068
-        self.lp_min =  5e-200
+        #self.up_max = 0.004191742773320068
+        #self.lp_min =  5e-200
 
 
     def __len__(self):
@@ -74,31 +66,8 @@ class PersistenceBaseGenerator(Sequence):
         self.train_paths, self.train_outputs = zip(*z)
 
 
-    def get_patches(self, img, patch_size=16):
-        nums = (img.shape[0]*img.shape[1]) / (patch_size**2)
-        patches = []
-        rows, cols = img.shape
-        for r in range(rows/patch_size):
-            for c in range(cols/patch_size):
-                pat = img[  r*patch_size : (r+1)*patch_size, c*patch_size : (c+1)*patch_size ]
-                patches.append(pat)
-        return np.array(patches)
-
-    def get_max(self, img, percent=0.20):
-
-        one = np.count_nonzero(img == 1)
-        zero = np.count_nonzero(img == 0)
-
-        if float(one) / (one+zero) >= percent:
-            return 1
-        else:
-            return 0
-
-
     def preprocess(self, img):
-
         img = 1.0*img/self.config.trainer.percentile_factor
-
         img = np.array([img])
         img = np.moveaxis(img, 0, 2)
         return img

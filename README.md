@@ -3,14 +3,15 @@
 # Running The Project 
 Start the training using:
 ```shell
-python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file>
+python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file> --results=<Path-to-results-directory>
 ```
 
 All models use Tensorboard by default in the callback.  
+The results directory will be created if it already doesn't exist.  
 
 To find the optimum learning rate using [One-Cycle-Learning-Rate](https://github.com/titu1994/keras-one-cycle) policy run the command as follows:  
 ```shell
-python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file> --findLR=True
+python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file> --results=<Path-to-results-directory> --findLR=True
 ```
 This will run the iterations for only one epoch and save the Learning Rate vs Loss curve in '<results>/LRFinder/' directory.
 
@@ -52,32 +53,39 @@ Arguments for test.py:
 ├── base/                     - this folder contains the abstract classes of the project components
 │   ├── base_data_loader.py   - this file contains the abstract class of the data loader.
 │   ├── base_model.py         - this contains file the abstract class of the model.
-│   └── base_train.py         - this file contains the abstract class of the trainer.
+│   └── base_trainer.py       - this file contains the abstract class of the trainer.
 │
 │
-├── models/                   - this folder contains the models(ResNet) for both persistence and RGB data.
-│   └── resnetPersistence_model.py
+├── models/                   - this folder contains the models for both persistence and RGB data.
+│   └── Persistence_model.py
 │   └── resnetRGB_model.py
+│   └── resnetCombined_model.py
 │
 │
 ├── trainer/                  - this folder contains the trainers for both persistence and RGB images.
-│   └── resnetPersistence_trainer.py
+│   └── Persistence_trainer.py
 │   └── resnetRGB_trainer.py
+│   └── resnetCombined_trainer.py
 │
 │
 ├── data_loader/              - this folder contains the data loaders for both persistence and RGB.
 │   └── persistence_data_loader.py
 │   └── rgb_data_loader.py
+│   └── combined_data_loader.py
 │
 │
 ├── configs/                  - this folder contains the model, the training and the TDA parameters in config file.
-│   └── model.config
+│   └── model.config          - The stats.pkl consists of dictionary of source means and variances of original RGB images
+│   └── stats.pkl             - which are used for Reinhard color normalization of patches
 │
 │
 └── utils/                    - this folder contains various utils required by the project.
      ├── args.py              - util functions for parsing arguments.
      ├── config.py            - util functions for parsing the config files.
-     └── tda_utils.py         - util functions for computing persistence images.
+     ├── tda_utils.py         - util functions for computing persistence images.
+     ├── evaluate.py          - contains functions to load test data and model for testing.
+     └── metrics.pkl          - contains implementations of metrics which are displayed while training.
+
 ```
 
 ## Data directory structure
@@ -85,7 +93,6 @@ Arguments for test.py:
 ```
 <data-directory>
 │
-├── binary_label.txt
 │
 ├── train/
 │     ├── malignant/
@@ -118,7 +125,7 @@ Arguments for test.py:
 
 # Documentation
 
-Patches are generated from RGB images with a size of 256,256,3. Not all patches are useful for training as most of them contain significant background or very less number of nuclei making them unsuitable for persistence image computation or for training.
+Patches are generated from RGB images with a size of (1024,1024,3). Not all patches are useful for training as most of them contain significant background or very less number of nuclei making them unsuitable for persistence image computation or for training.
 
 ## Preprocessing 
 The generated patches are rejected based on the following rules:  
