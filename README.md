@@ -6,16 +6,19 @@ Start the training using:
 python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file>
 ```
 
-The models uses Tensorboard by default in the callback.  
-The models currenty use one of the following two optimizers: 
-* SGD if optimizer is set to "sgd" in config file. Uses [One-Cyclic-Learning-Rate](https://github.com/titu1994/keras-one-cycle#training-with-onecyclelr) policy to update the learning rate.
-* Adam if optimizer is set to "adam" in config file. Uses [Reduce-LR-On-Plateau](https://keras.io/callbacks/#reducelronplateau) to control the learning rate.
+All models use Tensorboard by default in the callback.  
 
 To find the optimum learning rate using [One-Cycle-Learning-Rate](https://github.com/titu1994/keras-one-cycle) policy run the command as follows:  
 ```shell
 python main.py --data=<Path-to-data-directory> --config=<Path-to-config-file> --findLR=True
 ```
 This will run the iterations for only one epoch and save the Learning Rate vs Loss curve in '<results>/LRFinder/' directory.
+
+
+The models currenty use one of the following two optimizers: 
+* SGD: if optimizer is set to "sgd" in config file. Uses [One-Cyclic-Learning-Rate](https://github.com/titu1994/keras-one-cycle#training-with-onecyclelr) policy to update the learning rate.
+* Adam: if optimizer is set to "adam" in config file. Uses [Reduce-LR-On-Plateau](https://keras.io/callbacks/#reducelronplateau) to control the learning rate.
+
 
 Arguments for main.py:  
 ```shell
@@ -30,7 +33,7 @@ Arguments for main.py:
 --use_focal_loss True                          :  Uses focal loss if set to True (change parameters alpha and gamma in config file) 
 ```
 
-Specify the exp name in config as "Combined", "Persistence" or "RGB" to train on particular data.
+Specify the exp name in config as "Combined", "Persistence" or "RGB" to train on that particular data.
 
 
 Arguments for test.py:  
@@ -115,7 +118,7 @@ Arguments for test.py:
 
 # Documentation
 
-Patches are generated from RGB images with a size of 1024x1024x3. Not all patches are useful for training as most of them contain significant background or very less number of nuclei making them unsuitable for persistence image computation or for training.
+Patches are generated from RGB images with a size of 256,256,3. Not all patches are useful for training as most of them contain significant background or very less number of nuclei making them unsuitable for persistence image computation or for training.
 
 ## Preprocessing 
 The generated patches are rejected based on the following rules:  
